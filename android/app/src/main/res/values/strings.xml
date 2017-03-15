@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">warungapp</string>
+    <string name="app_name">Warungs</string>
+    <string name="facebook_app_id">955803851208838</string>
 </resources>

@@ -91,6 +91,7 @@ class HomeScreen extends Component {
         style={styles.container}
         dataSource={this.state.dataSource}
         renderRow={this.renderRow}
+        enableEmptySections={true}
       />
     )
   }
