@@ -13,6 +13,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { Card, List, ListItem } from 'react-native-elements';
 import { StackNavigator } from 'react-navigation';
+import { EndpointURL } from './Config';
 
 //Prepare ListView
 var ds = new ListView.DataSource({
@@ -36,11 +37,13 @@ class HomeScreen extends Component {
 
   componentWillMount = async () => {
     try {
-      const response = await fetch('http://wrg.baliprocom.com/warung');
+      console.log(EndpointURL.GET_WARUNG);
+      const response = await fetch(EndpointURL.GET_WARUNG);
       const posts = await response.json();
       console.log(posts);
       this.setState({loading: false, dataSource: this.state.dataSource.cloneWithRows(posts)});
     } catch (e) {
+      console.log(e);
       this.setState({loading: false, error: true});
     }
   }

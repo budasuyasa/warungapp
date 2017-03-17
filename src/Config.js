@@ -6,3 +6,19 @@ export const userIdKey = "userId";
 export const userNameKey = "userName";
 export const userEmailKey = "userEmail";
 export const isUserLogedInKey = "isUserLogedIn";
+
+//Ubah base url sesuai dengan server host API
+const baseURL = 'http://10.0.2.2/warungsapi/';
+export const EndpointURL = {
+  GET_WARUNG: `${baseURL}warung`,
+  LOGIN: `${baseURL}user/login`,
+}
+
+//Untuk key LocalStorage gunakan prefix entitas
+export const LocalStorage = {
+  userId: 'userId',
+  userName: 'userName',
+  userEmail: 'userEmail',
+  userAccessToken: 'userAccessToken',
+  isUserLogedIn: 'isUserLogedIn',
+}
