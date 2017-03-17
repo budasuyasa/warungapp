@@ -38,10 +38,7 @@ class Warungs extends Component {
 
   //Cek is user logedin
   componentWillMount() {
-    //Set logedin jadi 1
-
     this.load();
-    this.save();
   }
 
   _showLoginScreen = () => {
@@ -49,19 +46,11 @@ class Warungs extends Component {
     navigate('Login');
   }
 
-  save = async () => {
-    try {
-      await AsyncStorage.setItem(isUserLogedInKey, '0');
-
-      this.setState({isUserLogedInKey: '0'})
-    } catch (e) {
-      console.error('Failed to save name.');
-    }
-  }
-
   load = async () => {
     try {
       const isLogedIn = await AsyncStorage.getItem(isUserLogedInKey);
+      console.log(isLogedIn);
+
       if (isLogedIn !== null) {
         this.setState({isUserLogedIn: isLogedIn});
       }
