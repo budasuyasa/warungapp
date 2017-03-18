@@ -19,7 +19,11 @@ import {
   LocalStorage
 } from './Config';
 
+import { createStore } from 'redux';
+import { reducer, actionCreators } from './redux/LoginRedux';
+
 const backgroundImage = require('./images/background.png');
+const store = createStore(reducer);
 
 
 const FBSDK = require('react-native-fbsdk');
@@ -110,9 +114,18 @@ export default class Login extends Component {
                 }
               }
               onLogoutFinished={() => alert("logout.")}/>
+              <Button
+                raised
+                icon={{name: 'coffee', type: 'font-awesome'}}
+                title='Menu'
+                buttonStyle={{backgroundColor: '#2ecc71', marginBottom: 10, marginTop: 10,}}
+                onPress={()=>{
+                  const { navigate } = this.props.navigation;
+                  navigate('Warungs', {warung: this.props.navigation.state.params.warung})}
+                }
+              />
           </View>
         </Image>
-
     );
   }
 }

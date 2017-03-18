@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   }
-
 });
 
 export default HomeScreen;

@@ -21,6 +21,9 @@ import {
   userNameKey
 } from './Config';
 
+import { createStore } from 'redux';
+import { reducer, actionCreators } from './redux/LoginRedux';
+const store = createStore(reducer);
 
 class Warungs extends Component {
   static navigationOptions = {
@@ -31,19 +34,33 @@ class Warungs extends Component {
     liked: false,
     likeText: WarungLikeText,
     totalLike: parseInt(this.props.navigation.state.params.warung.warungTotalRate),
-    isUserLogedIn: '0',
-    userId: null,
-    userName: null,
+    userData: {
+      name: 'You',
+      email: null,
+      accessToken: null,
+      isUserLogedIn: '0',
+    }
   };
 
   //Cek is user logedin
   componentWillMount() {
-    this.load();
+
+    const { userData } = store.getState();
+    this.setState({userData});
+    this.unsubscribe = store.subscribe(() => {
+      const {userData} = store.getState()
+      this.setState({userData});
+    });
+    console.log(this.state);
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe()
   }
 
   _showLoginScreen = () => {
     const { navigate } = this.props.navigation;
-    navigate('Login');
+    navigate('Login',this.props.navigation.state.params.warung);
   }
 
   load = async () => {
@@ -60,8 +77,8 @@ class Warungs extends Component {
   }
 
 
-  _onPressLike = () => {
-    if(this.state.isUserLogedIn === '0'){
+  _onPressLike =  () => {
+    if(this.state.userData.isUserLogedIn === '0'){
       this._showLoginScreen();
     }else{
       this.setState({
@@ -73,6 +90,7 @@ class Warungs extends Component {
   }
 
   render() {
+    console.log(this.state);
     //Get data yang dipass dari HomeScreen degan mengakses state dari navigation
     const { params } = this.props.navigation.state;
     //Ubah <br> tag dengan new line
@@ -104,6 +122,7 @@ class Warungs extends Component {
   const likedStyles = this.state.liked ? styles.liked : null;
   const captionLike = this.state.liked ? WarungLikedText : WarungLikeText;
   const totalLike = this.state.totalLike;
+  console.log(this.state);
 
     return (
       <ScrollView>
@@ -138,6 +157,18 @@ class Warungs extends Component {
               {captionLike}
             </Text>
           </View>
+          <Button
+            raised
+            icon={{name: 'coffee', type: 'font-awesome'}}
+            title='Menu'
+            buttonStyle={{backgroundColor: '#2ecc71', marginBottom: 10, marginTop: 10,}}
+            onPress={() => store.dispatch(actionCreators.login({
+              name: 'Buda',
+              email: 'budasuyasa@gmail.com',
+              accessToken: 'fewafeawf823rkmf8f32f3q323ffe',
+
+            }))}
+          />
 
           <View style={styles.infoContainer}>
               <Text>{deskripsi}</Text>
