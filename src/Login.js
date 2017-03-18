@@ -43,7 +43,7 @@ export default class Login extends Component {
   };
 
   initUser(token) {
-    console.log('Get facebook user data');
+    console.log('Login: Get facebook user data');
     fetch('https://graph.facebook.com/v2.5/me?fields=email,name,friends&access_token=' + token)
     .then((response) => response.json())
     .then((json) => {
@@ -74,7 +74,7 @@ export default class Login extends Component {
   }
 
   _saveLocalStorage = async (res) => {
-    console.log('save user data to local storage');
+    console.log('Login: save user data to local storage');
     try {
       await AsyncStorage.setItem(LocalStorage.userAccessToken, res.userAccessToken);
       await AsyncStorage.setItem(LocalStorage.userEmail, res.userEmail);
@@ -114,16 +114,6 @@ export default class Login extends Component {
                 }
               }
               onLogoutFinished={() => alert("logout.")}/>
-              <Button
-                raised
-                icon={{name: 'coffee', type: 'font-awesome'}}
-                title='Menu'
-                buttonStyle={{backgroundColor: '#2ecc71', marginBottom: 10, marginTop: 10,}}
-                onPress={()=>{
-                  const { navigate } = this.props.navigation;
-                  navigate('Warungs', {warung: this.props.navigation.state.params.warung})}
-                }
-              />
           </View>
         </Image>
     );
