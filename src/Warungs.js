@@ -26,6 +26,8 @@ import {
   LocalStorage,
 } from './Config';
 
+import { realmWarung } from './realm/RealmWarung';
+
 class Warungs extends Component {
   static navigationOptions = {
     title: ({state}) => `${state.params.warung.warungNama}`,
@@ -43,75 +45,31 @@ class Warungs extends Component {
     }
   };
 
-  componentWillMount() {
+  componentWillMount = async() => {
     //this.load();
-  }
-
-
-  _showLoginScreen = () => {
-    const { navigate } = this.props.navigation;
-    navigate('Login',this.props.navigation.state.params.warung);
-  }
-
-
-
-  _isUserLogedIn = async () => {
     try {
-
-      const isLogedIn = await AsyncStorage.getItem(LocalStorage.isUserLogedInKey);
-
-      // const accessToken = await AsyncStorage.getItem(LocalStorage.userAccessToken);
-      // const name = await AsyncStorage.getItem(LocalStorage.userName);
-      // const email = await AsyncStorage.getItem(LocalStorage.userEmail);
-
-      if (isLogedIn === '1' && accessToken !== null) {
-
+      const isLogedIn = await AsyncStorage.getItem(LocalStorage.isUserLogedIn);
+      const name = await AsyncStorage.getItem(LocalStorage.userName);
+      const accessToken = await AsyncStorage.getItem(LocalStorage.userAccessToken);
+      const email = await AsyncStorage.getItem(LocalStorage.userEmail);
+      if(isLogedIn === '1'){
         this.setState({userData:{
           name: name,
           email: email,
           accessToken: accessToken,
           isUserLogedIn: '1',
         }});
-
-        return true;
+        this._like_get(accessToken);
       }
-
     } catch (e) {
-      console.error('Failed to load name.')
-    }
-
-    return false;
-  }
-
-
-  load(){
-    async () => {
-      try {
-        const isLogedIn = await AsyncStorage.getItem(LocalStorage.isUserLogedIn);
-        const name = await AsyncStorage.getItem(LocalStorage.userName);
-        const accessToken = await AsyncStorage.getItem(LocalStorage.userAccessToken);
-        const email = await AsyncStorage.getItem(LocalStorage.userEmail);
-
-        if (isLogedIn === null) {
-          console.log('User not login');
-          return false;
-        }else if(isLogedIn === '1'){
-          this.setState({userData:{
-            name: name,
-            email: email,
-            accessToken: accessToken,
-            isUserLogedIn: '1',
-          }});
-          console.log('User logedin');
-          return true;
-        }
-      } catch (e) {
-        console.log('Failed to load name.')
-      }
+      console.log('Failed to load name.')
     }
   }
 
-
+  _showLoginScreen = () => {
+    const { navigate } = this.props.navigation;
+    navigate('Login',this.props.navigation.state.params.warung);
+  }
 
   _onPressLike =  async () => {
       try {
@@ -123,7 +81,7 @@ class Warungs extends Component {
         if (isLogedIn === null) {
           this._showLoginScreen();
         }else if(isLogedIn === '1'){
-          
+
           this.setState({userData:{
             name: name,
             email: email,
@@ -136,11 +94,61 @@ class Warungs extends Component {
             totalLike: this.state.liked ? this.state.totalLike - 1 : this.state.totalLike + 1
           });
 
+          this._like_post(accessToken);
 
         }
       } catch (e) {
         console.log('Failed to load name.')
       }
+  }
+
+  _like_get = async (accessToken) => {
+    const warungId = this.props.navigation.state.params.warung.warungId;
+    console.log('Liking warung...')
+    try {
+      console.log(`${EndpointURL.LIKE}/?access_token=${accessToken}&warung_id=${warungId}`);
+      const response = await fetch(`${EndpointURL.LIKE}/?access_token=${accessToken}&warung_id=${warungId}`, {
+      	method: 'get',
+        headers: {'Content-Type':'application/x-www-form-urlencoded','Accept': 'application/json'},
+      });
+      const res = await response.json();
+      console.log(res);
+
+      if(res.status==='success')
+      {
+          if(res.state==='liked')
+          {
+            this.setState({
+              liked: true,
+            });
+          }
+      }
+
+    } catch (e) {
+      console.log(e);
+      this.setState({loading: false, error: true});
+    }
+  }
+
+  _like_post = async (accessToken) => {
+    const warungId = this.props.navigation.state.params.warung.warungId;
+    console.log('Liking warung...')
+    try {
+      console.log(EndpointURL.LIKE);
+      const response = await fetch(EndpointURL.LIKE, {
+      	method: 'post',
+        headers: {'Content-Type':'application/x-www-form-urlencoded','Accept': 'application/json'},
+        body: `access_token=${accessToken}&warung_id=${warungId}`
+      });
+      const res = await response.json();
+      console.log(res);
+
+      //Save or delete liked warung to/from REALM db
+
+    } catch (e) {
+      console.log(e);
+      this.setState({loading: false, error: true});
+    }
   }
 
   render() {

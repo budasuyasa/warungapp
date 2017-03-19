@@ -12,6 +12,7 @@ const baseURL = 'http://10.0.2.2/warungsapi/';
 export const EndpointURL = {
   GET_WARUNG: `${baseURL}warung`,
   LOGIN: `${baseURL}user/login`,
+  LIKE: `${baseURL}warung/like`,
 }
 
 //Untuk key LocalStorage gunakan prefix entitas
