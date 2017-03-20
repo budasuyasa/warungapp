@@ -10,23 +10,29 @@ import {
    ActivityIndicator,
    TouchableHighlight
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import { Card, List, ListItem } from 'react-native-elements';
-import { StackNavigator } from 'react-navigation';
-import { EndpointURL } from './Config';
+import { EndpointURL, ImageURL } from './Config';
+import { Button, Icon } from 'react-native-elements'
 
 //Prepare ListView
 var ds = new ListView.DataSource({
   rowHasChanged: (r1, r2) => r1.warungId !== r2.warungId
 });
 
-const imageDir = 'http://wrg.baliprocom.com/src/public/img/';
-
-class HomeScreen extends Component {
-
+class WarungList extends Component {
   //Set setting untuk navigasi
   static navigationOptions = {
     title: 'Warung',
+    tabBar: {
+      label: 'Warung',
+      // Note: By default the icon is only shown on iOS. Search the showIcon option below.
+      icon: ({ tintColor }) => (
+        <Icon
+          name='bowl'
+          type='entypo'
+          color='#f50' />
+      ),
+    },
   };
 
   state = {
@@ -48,18 +54,16 @@ class HomeScreen extends Component {
     }
   }
 
-
   _openWarungs = (warungs) => {
     const { navigate } = this.props.navigation;
     console.log(warungs.warungNama);
     navigate('Warungs', {warung: warungs});
   }
 
-
   renderRow = (rowData) => {
     return (
       <TouchableHighlight onPress={ () => this._openWarungs(rowData)} underlayColor="#fefefe">
-        <Image style={styles.thumbail} source={{uri: imageDir+rowData.warungGambar }}>
+        <Image style={styles.thumbail} source={{uri: ImageURL+rowData.warungGambar }}>
             <View style={styles.level}>
               <Text style={{color:'white'}}>Lvl {rowData.warungLevelHarga} </Text>
             </View>
@@ -73,7 +77,6 @@ class HomeScreen extends Component {
   }
 
   render() {
-
     const {loading, error} = this.state;
     const { navigate } = this.props.navigation;
 
@@ -85,7 +88,9 @@ class HomeScreen extends Component {
 
     if(error){
       return(
-        <Text>Something wrong</Text>
+        <View style={[styles.container]}>
+          <Text>Something wrong</Text>
+        </View>
       );
     }
 
@@ -153,7 +158,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
+  },
+  tabIcon: {
+    width: 60,
+    height: 60
   }
 });
 
-export default HomeScreen;
+export default WarungList;

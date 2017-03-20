@@ -14,6 +14,7 @@ export const EndpointURL = {
   LOGIN: `${baseURL}user/login`,
   LIKE: `${baseURL}warung/like`,
 }
+export const ImageURL = `http://wrg.baliprocom.com/src/public/img/`;
 
 //Untuk key LocalStorage gunakan prefix entitas
 export const LocalStorage = {

@@ -47,6 +47,7 @@ class Warungs extends Component {
 
   componentWillMount = async() => {
     //this.load();
+    const warungId = this.props.navigation.state.params.warung.warungId;
     try {
       const isLogedIn = await AsyncStorage.getItem(LocalStorage.isUserLogedIn);
       const name = await AsyncStorage.getItem(LocalStorage.userName);
@@ -63,6 +64,18 @@ class Warungs extends Component {
       }
     } catch (e) {
       console.log('Failed to load name.')
+    }
+
+    //Jika user sudah like warung, rubah state liked
+    try{
+      let rWarungs = realmWarung.objects('Warungs').filtered(`warungId = "${warungId}"`);
+      if(rWarungs.length===1){
+          this.setState({
+            liked: true,
+          });
+      }
+    }catch(e){
+      console.log(e);
     }
   }
 
@@ -81,7 +94,6 @@ class Warungs extends Component {
         if (isLogedIn === null) {
           this._showLoginScreen();
         }else if(isLogedIn === '1'){
-
           this.setState({userData:{
             name: name,
             email: email,
@@ -93,9 +105,7 @@ class Warungs extends Component {
             liked: !this.state.liked, //inverse state liked
             totalLike: this.state.liked ? this.state.totalLike - 1 : this.state.totalLike + 1
           });
-
           this._like_post(accessToken);
-
         }
       } catch (e) {
         console.log('Failed to load name.')
@@ -103,6 +113,9 @@ class Warungs extends Component {
   }
 
   _like_get = async (accessToken) => {
+    //Get liked dari REALM
+
+
     const warungId = this.props.navigation.state.params.warung.warungId;
     console.log('Liking warung...')
     try {
@@ -113,7 +126,6 @@ class Warungs extends Component {
       });
       const res = await response.json();
       console.log(res);
-
       if(res.status==='success')
       {
           if(res.state==='liked')
@@ -142,9 +154,23 @@ class Warungs extends Component {
       });
       const res = await response.json();
       console.log(res);
+      if(res.status==='success')
+      {
+        if(res.state==='liked')
+        {
+          realmWarung.write(()=>{
+              realmWarung.create('Warungs', this.props.navigation.state.params.warung);
+          });
 
-      //Save or delete liked warung to/from REALM db
-
+        }
+        else if(res.state=='unliked')
+        {
+          let sWarung = realmWarung.objects('Warungs').filtered(`warungId = ${warungId}`);
+          realmWarung.write(() => {
+            realmWarung.delete(sWarung);
+          });
+        }
+      }
     } catch (e) {
       console.log(e);
       this.setState({loading: false, error: true});

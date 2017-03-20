@@ -19,6 +19,8 @@ import {
   LocalStorage
 } from './Config';
 
+import { realmWarung } from './realm/RealmWarung';
+
 import { createStore } from 'redux';
 import { reducer, actionCreators } from './redux/LoginRedux';
 
@@ -75,6 +77,7 @@ export default class Login extends Component {
 
   _saveLocalStorage = async (res) => {
     console.log('Login: save user data to local storage');
+
     try {
       await AsyncStorage.setItem(LocalStorage.userAccessToken, res.userAccessToken);
       await AsyncStorage.setItem(LocalStorage.userEmail, res.userEmail);
@@ -83,8 +86,21 @@ export default class Login extends Component {
       //Finish login screen
       this.props.navigation.goBack();
     } catch (e) {
-      console.error(e);
-      console.error('Failed to save local data');
+      console.log(e);
+      console.log('Failed to save local data');
+    }
+
+    //Save liked warung to realm
+    try {
+      console.log('Saving user preferences...');
+      console.log(res.likedWarung);
+      realmWarung.write(()=>{
+        res.likedWarung.forEach((values)=>{
+            realmWarung.create('Warungs', values, true);
+        });
+      });
+    } catch(e){
+      console.log(e);
     }
   }
 
