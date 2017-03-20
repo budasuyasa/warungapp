@@ -8,11 +8,13 @@ import {
    ListView,
    Image,
    ActivityIndicator,
-   TouchableHighlight
+   TouchableHighlight,
+   AsyncStorage,
 } from 'react-native';
 import { Card, List, ListItem } from 'react-native-elements';
-import { EndpointURL, ImageURL } from './Config';
+import { EndpointURL, ImageURL, LocalStorage } from './Config';
 import { Button, Icon } from 'react-native-elements'
+import { realmWarung } from './realm/RealmWarung';
 
 //Prepare ListView
 var ds = new ListView.DataSource({
@@ -41,17 +43,61 @@ class UserWarungTab extends Component {
     dataSource: ds.cloneWithRows([])
   };
 
-  componentWillMount = async () => {
+  _getLikedWarung = async() => {
+    //Get list of user liked warung
     try {
-      console.log(EndpointURL.GET_WARUNG);
-      const response = await fetch(EndpointURL.GET_WARUNG);
-      const posts = await response.json();
-      console.log(posts);
-      this.setState({loading: false, dataSource: this.state.dataSource.cloneWithRows(posts)});
+
+      //Cek access token user
+      const accessToken = await AsyncStorage.getItem(LocalStorage.userAccessToken);
+
+      if(accessToken === null || accessToken === undefined){
+        return;
+      }
+
+      //Dapatkan warung yang disimpan user
+      let rWarungs = realmWarung.objects('Warungs');
+
+      //Stop if no warung stored
+      if(rWarungs.length === 0){
+        return;
+      }
+
+      //Get data dari REST API jika local warung ada
+      let arrWarungIds = [];
+      rWarungs.forEach((values) => {
+        arrWarungIds.push(values.warungId);
+      });
+      let warungIds = JSON.stringify(arrWarungIds);
+
+      const response = await fetch(EndpointURL.GET_WARUNG, {
+      	method: 'post',
+        headers: {'Content-Type':'application/x-www-form-urlencoded','Accept': 'application/json'},
+        body: `access_token=${accessToken}&warung_list=${warungIds}`,
+      });
+      const res = await response.json();
+
+      if(res.status==='success'){
+        //Update data warung pada local storage
+        realmWarung.write(()=>{
+          res.data.forEach((values)=>{
+              realmWarung.create('Warungs', values, true);
+          });
+        });
+        this.setState({loading: false, dataSource: this.state.dataSource.cloneWithRows(res.data)});
+      }else{
+        //Jika get data dari REST API gagal, load dari local
+          this.setState({loading: false, dataSource: this.state.dataSource.cloneWithRows(rWarungs)});
+      }
+
     } catch (e) {
       console.log(e);
-      this.setState({loading: false, error: true});
+      let rWarungs = realmWarung.objects('Warungs');
+      this.setState({loading: false, dataSource: this.state.dataSource.cloneWithRows(rWarungs)});
     }
+  }
+
+  componentWillMount() {
+    this._getLikedWarung();
   }
 
   _openWarungs = (warungs) => {
@@ -81,26 +127,35 @@ class UserWarungTab extends Component {
     const { navigate } = this.props.navigation;
 
     if(loading){
-      <View style={styles.center}>
-          <ActivityIndicator animating={true} />
-      </View>
+      return(
+        <View style={styles.containerLoading}>
+            <ActivityIndicator size="large" animating={true} />
+            <Text>Loading...</Text>
+        </View>
+      );
     }
 
     if(error){
       return(
-        <View style={[styles.container]}>
-          <Text>Something wrong</Text>
+        <View style={[styles.containerLoading]}>
+          <Icon
+            name='meh-o'
+            type='font-awesome'
+            color='#ccc' />
+          <Text>Tidak Dapat Mengontak Server!</Text>
         </View>
       );
     }
 
     return (
-      <ListView
-        style={styles.container}
-        dataSource={this.state.dataSource}
-        renderRow={this.renderRow}
-        enableEmptySections={true}
-      />
+      <View style={[styles.bgWhite, styles.container]}>
+        <ListView
+          style={styles.container}
+          dataSource={this.state.dataSource}
+          renderRow={this.renderRow}
+          enableEmptySections={true}
+        />      
+      </View>
     )
   }
 }
@@ -108,6 +163,19 @@ class UserWarungTab extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  bgWhite: {
+    backgroundColor: 'white',
+  },
+  containerLoading: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  containerListView: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
   row: {
     padding: 15,

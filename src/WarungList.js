@@ -81,26 +81,37 @@ class WarungList extends Component {
     const { navigate } = this.props.navigation;
 
     if(loading){
-      <View style={styles.center}>
-          <ActivityIndicator animating={true} />
-      </View>
+      return(
+        <View style={styles.containerLoading}>
+            <ActivityIndicator size="large" animating={true} />
+            <Text>Loading...</Text>
+        </View>
+      );
+
     }
 
     if(error){
       return(
-        <View style={[styles.container]}>
-          <Text>Something wrong</Text>
+        <View style={[styles.containerLoading]}>
+          <Icon
+            name='meh-o'
+            type='font-awesome'
+            color='#ccc' />
+          <Text>Tidak Dapat Mengontak Server!</Text>
         </View>
       );
     }
 
     return (
-      <ListView
-        style={styles.container}
-        dataSource={this.state.dataSource}
-        renderRow={this.renderRow}
-        enableEmptySections={true}
-      />
+      <View style={styles.container}>
+        <ListView
+          style={styles.container}
+          dataSource={this.state.dataSource}
+          renderRow={this.renderRow}
+          enableEmptySections={true}
+        />
+      </View>
+
     )
   }
 }
@@ -108,6 +119,13 @@ class WarungList extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  containerLoading: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   row: {
     padding: 15,

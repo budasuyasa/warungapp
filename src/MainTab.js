@@ -28,6 +28,8 @@ const MainTab = TabNavigator({
     },
     style: {
       backgroundColor: 'white',
+      borderTopColor: '#bdc3c7',
+      borderTopWidth: 1
     },
   }
 });
